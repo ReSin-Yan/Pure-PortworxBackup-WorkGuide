@@ -94,15 +94,13 @@ sudo vim /etc/exports
 如果是其它Kubernetes的平台，需要確認能夠正常的執行Kubernetes的相關操作  
 可以跳轉到下一章節  
 
-登入到Taznu環境  
+登入到Taznu環境(如果是其他native環境可以不用)  
 ```
-export KUBECTL_VSPHERE_PASSWORD=P@ssw0rd
-kubectl vsphere login --server=10.66.99.2 --insecure-skip-tls-verify  --vsphere-username administrator@vsphere.local --tanzu-kubernetes-cluster-name  [輸入姓名]-tkc1
-kubectl vsphere login --server=10.66.99.2 --insecure-skip-tls-verify  --vsphere-username administrator@vsphere.local --tanzu-kubernetes-cluster-name  [輸入姓名]-tkc2
-kubectl config use-context [輸入姓名]-tkc[x]
+kubectl vsphere login --server=x.x.x.x --insecure-skip-tls-verify  --vsphere-username xx@xx.com --tanzu-kubernetes-cluster-name  [tkc-name]
+kubectl config use-context [tkc-name]
 ```
 
-下載gcallowroot yaml(TKC需要)  
+下載gcallowroot yaml(TKC需要、Pure Portworx需要)  
 ```
 sudo apt-get install -y git
 cd 
@@ -112,7 +110,6 @@ kubectl apply -f gcallowroot.yaml
 ```
 
 安裝NFS sub-dir(如有Kubernetes本身已有StorageClass也建議設定)  
-
 ```
 cd 
 helm repo add nfs-subdir-external-provisioner https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
