@@ -65,7 +65,7 @@ sudo docker run -d -p 9000:9000 -p 9090:9090 --name pure   -e "MINIO_ROOT_USER=p
 
 ![img](https://github.com/ReSin-Yan/Veeam-Kasten-WorkGuide/blob/main/img/minio01.png "img")  
 ![img](https://github.com/ReSin-Yan/Veeam-Kasten-WorkGuide/blob/main/img/minio02.png "img")  
-![img](https://github.com/ReSin-Yan/Veeam-Kasten-WorkGuide/blob/main/img/minio03.png "img")  
+![img](https://github.com/ReSin-Yan/Veeam-Kasten-WorkGuide/blob/main/img/xx "img")  
 
 安裝NFS  
 同時間也安裝NFS  
