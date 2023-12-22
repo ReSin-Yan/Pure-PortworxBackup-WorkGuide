@@ -67,7 +67,6 @@ sudo docker run -d -p 9000:9000 -p 9090:9090 --name pure   -e "MINIO_ROOT_USER=p
 
 ![img](https://github.com/ReSin-Yan/Veeam-Kasten-WorkGuide/blob/main/img/minio01.png "img")  
 ![img](https://github.com/ReSin-Yan/Veeam-Kasten-WorkGuide/blob/main/img/minio02.png "img")  
-![img](https://github.com/ReSin-Yan/Veeam-Kasten-WorkGuide/blob/main/img/xx "img")  
 
 安裝NFS  
 同時間也安裝NFS  
@@ -133,8 +132,15 @@ kubectl apply -f stork-spec.yaml
 安裝方式為對外(可以改成air-gapped)  
 可以由以下兩種方式取得安裝指令  
 由官網產生  
+[Portworx官網](https://central.portworx.com/landing/login?redirectUrl=%2Fdashboard "link")  
 
 
+![img](https://github.com/ReSin-Yan/Pure-PortworxBackup-WorkGuide/blob/main/img/pure1.jpg "img")  
+分別選擇版本及namespace名稱  
+storageclass為必須  
+可以輸入剛剛建立的nfs-client  
+![img](https://github.com/ReSin-Yan/Pure-PortworxBackup-WorkGuide/blob/main/img/pure2.jpg "img")  
+![img](https://github.com/ReSin-Yan/Pure-PortworxBackup-WorkGuide/blob/main/img/pure3.jpg "img")  
 
 或是直接參考以下指令  
 ```
@@ -191,45 +197,42 @@ helm uninstall k10 -n kasten-io
 
 ### Cluster Profile  
 
-### Location Profile  
-
 通過以下指令找到服務UI  
 ```
 kubectl get svc -n central
 ```
+![img](https://github.com/ReSin-Yan/Pure-PortworxBackup-WorkGuide/blob/main/img/pure4.jpg "img")  
 
-預設帳號密碼皆為`admin`  
-
+預設帳號密碼皆為`admin` 
 新增cluster至portworx backup 
+![img](https://github.com/ReSin-Yan/Pure-PortworxBackup-WorkGuide/blob/main/img/pure11.jpg "img")  
+
+輸入cluster name  
+以及通過在k8s上面輸入  
+```
+kubectl config view --flatten --minify
+```
+![img](https://github.com/ReSin-Yan/Pure-PortworxBackup-WorkGuide/blob/main/img/pure13.jpg "img")  
 
 
-Location Profile目前總共支援6種模式  
+### Location Profile  
+
+Location Profile目前總共支5種模式  
 其中分為三大公有雲空間  
-以及地端三種空間NFS、S3、VBR  
-其中VBR只有支援Tanzu  
-
+以及地端三種空間NFS、S3  
+  
+![img](https://github.com/ReSin-Yan/Pure-PortworxBackup-WorkGuide/blob/main/img/pure5.jpg "img")  
 新增Cloud Accounts  
 其中地端S3請選擇AWS / S3 這一欄  
-img  
-img  
-
-
+![img](https://github.com/ReSin-Yan/Pure-PortworxBackup-WorkGuide/blob/main/img/pure6.jpg "img")  
 
 新增S3空間  
 使用預先準備的minio空間([MINIO](https://github.com/ReSin-Yan/Veeam-Kasten-WorkGuide#linux-client-%E6%BA%96%E5%82%99   "link") )   
-![img](https://github.com/ReSin-Yan/Veeam-Kasten-WorkGuide/blob/main/img/03s3.png "img")  
-
-設定完成可以再minio空間看到資料夾建立  
-![img](https://github.com/ReSin-Yan/Veeam-Kasten-WorkGuide/blob/main/img/04s3.png "img")  
-
-設定VBR前需要先設置vsphere Infrastructure Profiles([Infrastructure](https://github.com/ReSin-Yan/Veeam-Kasten-WorkGuide#infrastructure-profiles   "link") )   
-之後依序輸入資訊  
-![img](https://github.com/ReSin-Yan/Veeam-Kasten-WorkGuide/blob/main/img/05vbr.png "img")  
-
-
+![img](https://github.com/ReSin-Yan/Pure-PortworxBackup-WorkGuide/blob/main/img/pure7.jpg "img")  
+![img](https://github.com/ReSin-Yan/Pure-PortworxBackup-WorkGuide/blob/main/img/pure8.jpg "img")  
 
 新增NFS空間  
-使用NFS當作儲存空間  
+![img](https://github.com/ReSin-Yan/Pure-PortworxBackup-WorkGuide/blob/main/img/pure9.jpg "img")  
 
 
 
@@ -269,10 +272,42 @@ kubectl get svc -A
 開啟服務之後  
 預設帳號密碼為`admin`   
 
+分別上傳檔案  
+![img](https://github.com/ReSin-Yan/Pure-PortworxBackup-WorkGuide/blob/main/img/pure10.jpg "img")  
 
 ## 測試功能建立    
 
-分別備份以下  
+### vmware-csi測試    
+選擇k8s叢集近來  
+選擇vsan-csi
+![img](https://github.com/ReSin-Yan/Pure-PortworxBackup-WorkGuide/blob/main/img/pure14.jpg "img")  
+![img](https://github.com/ReSin-Yan/Pure-PortworxBackup-WorkGuide/blob/main/img/pure15.jpg "img")  
+
+### nfs-csi測試    
+選擇k8s叢集近來  
+選擇nfs-csi
+![img](https://github.com/ReSin-Yan/Pure-PortworxBackup-WorkGuide/blob/main/img/pure17.jpg "img")  
+
+### 還原測試  
+
+確認備份工作都完成以後  
+![img](https://github.com/ReSin-Yan/Pure-PortworxBackup-WorkGuide/blob/main/img/pure18.jpg "img")  
+
+輸入以下指令將deploy以及PVC刪除  
+可以同步去檢查服務是否還在  
+```
+kubectl delete deploy filebrowser-nfs -n nfs-csi
+kubectl delete deploy filebrowser-app -n vsan-csi
+kubectl delete pvc demo-pvc -n nfs-csi
+kubectl delete pvc demo-pvc -n vsan-csi
+```
+
+選擇restroe  
+選擇自訂還原  
+![img](https://github.com/ReSin-Yan/Pure-PortworxBackup-WorkGuide/blob/main/img/pure19.jpg "img")  
 
 
 
+等待還原工作結束之後  
+檢查服務、檔案是否還原成功  
+![img](https://github.com/ReSin-Yan/Pure-PortworxBackup-WorkGuide/blob/main/img/pure20.jpg "img")  
