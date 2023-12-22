@@ -249,8 +249,8 @@ kubectl create ns vsan-csi
 
 ```
 cd
-git clone https://github.com/ReSin-Yan/Veeam-Kasten-WorkGuide.git
-cd Veeam-Kasten-WorkGuide/nfscsi/
+git clone https://github.com/ReSin-Yan/Pure-PortworxBackup-WorkGuide.git
+cd Pure-PortworxBackup-WorkGuide/nfscsi/
 kubectl apply -f pre.yaml  -n nfs-csi
 kubectl apply -f post.yaml  -n nfs-csi
 kubectl get svc -n nfs-csi
