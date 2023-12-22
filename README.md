@@ -74,7 +74,7 @@ Portworx Backup同時支援兩種模式(S3,NFS)
 sudo apt-get install nfs-kernel-server nfs-common
 mkdir nfsshare
 sudo chmod -R 777 /home/ubuntu/nfsshare/
-```
+```s
 編輯/etc/exports  
 ```
 sudo vim /etc/exports  
@@ -122,14 +122,21 @@ helm install nfs-subdir-external-provisioner nfs-subdir-external-provisioner/nfs
 ## 安裝說明  
 請參考以下安裝參數設定 
 會標明必須或是需要討論  
-版本為5.x.x  
+版本為2.6  
 安裝方式為對外(可以改成air-gapped)  
-其餘參數會主要針對雲端環境(Azure,vsphere,aws)，或是Kasten的其餘服務(Promethues,Grafana,Kanister)  
-這邊只擷取可能會用到的部分  
+可以由以下兩種方式取得安裝指令  
+由官網產生  
 
-設定namespace的scc(OCP需要)  
+
+
+或是直接參考以下指令  
 ```
---set scc.create=true
+kubectl creater ns central
+helm repo add portworx http://charts.portworx.io/ && helm repo update
+helm install px-central portworx/px-central --namespace central \
+--create-namespace \
+--version 2.6.0 \
+--set persistentStorage.enabled=true,persistentStorage.storageClassName="wcppolicy",pxbackup.enabled=true
 ```
 
 ### 可以討論的參數  
