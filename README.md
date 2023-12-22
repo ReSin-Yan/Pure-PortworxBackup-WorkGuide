@@ -26,7 +26,12 @@ Portworx Backup也是Portworx其中一個套件，但是可以單獨使用
 
 ## 事前準備  
 
+事前準備為以下列表  
 
+ | 套件名稱 | 角色  |
+|-------|-------|
+| Linux | 當作kubernetess的bastion機，以及安裝minio及nfs的空間 |  
+| helm | 使用helm安裝 |  
   
 ## Linux Client 準備  
 
