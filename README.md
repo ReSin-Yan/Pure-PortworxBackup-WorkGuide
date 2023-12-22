@@ -131,7 +131,7 @@ helm install nfs-subdir-external-provisioner nfs-subdir-external-provisioner/nfs
 
 或是直接參考以下指令  
 ```
-kubectl creater ns central
+kubectl create ns central
 helm repo add portworx http://charts.portworx.io/ && helm repo update
 helm install px-central portworx/px-central --namespace central \
 --create-namespace \
