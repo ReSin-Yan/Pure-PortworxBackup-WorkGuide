@@ -20,6 +20,8 @@ Portworx Backup也是Portworx其中一個套件，但是可以單獨使用
 [參考網站](https://www.purestorage.com/tw/products/cloud-native-applications/portworx.html "link")  
 
 
+測試不包含性能測試  
+
 ### 安裝步驟   
 
 ## 事前準備  
@@ -198,6 +200,8 @@ kubectl get svc -n central
 
 預設帳號密碼皆為`admin`  
 
+新增cluster至portworx backup 
+
 
 Location Profile目前總共支援6種模式  
 其中分為三大公有雲空間  
@@ -267,6 +271,8 @@ kubectl get svc -A
 
 
 ## 測試功能建立    
+
+分別備份以下  
 
 
 
