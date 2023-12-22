@@ -141,106 +141,38 @@ helm install px-central portworx/px-central --namespace central \
 
 ### 可以討論的參數  
 
-如果可以配合建立命名空間 kasten-io就輸入以下，不行則填入客戶提供的namespace  
+[參考網站](https://docs.portworx.com/portworx-backup-on-prem/reference/install-helm-chart "link")  
+
+沒有特別需要注意的參數  
+比較需要特別注意的是AirGapped的安裝過程會需要輸入比較多的參數  
+
+如果可以配合建立命名空間 central就輸入以下，不行則填入可以提供的namespace  
 ```
---namespace=kasten-io
+--namespace=central
 ```
 
-以下兩個參數為volumesnapshot不支援的情形下的替代方案  
-第二行為根據namespace來進行設定，POC可以不用更改，但是實務上建議改成第三行by Object啟用  
 
-```
---set injectKanisterSidecar.enabled=true 
---set-string injectKanisterSidecar.namespaceSelector.matchLabels.k10/injectKanisterSidecar=true
---set-string injectKanisterSidecar.objectSelector.matchLabels=true
-```
 
 ingress網路 or LoadBalance  
 網路服務此段會根據使用者有沒有L4 or L7的服務來進行設定  
 考量到的點是，POC情境下，使用者不接受tunnel的方式or服務正式上線  
+Portworx預設為Loadbalance，如果沒有安裝可以參考以下  
+[MetalLB安裝過程](https://github.com/ReSin-Yan/kubernetes-Course/tree/main/Kubernetes/3.service/LoadBalance "link")  
 
-L4 LoadBalance  
+L4 LoadBalance(預設為loadbalance)  
 ```
---set externalGateway.create=true  
-```
-
-L7 ingress  
-```
---set ingress.create=true
---set ingress.class=contour
---set ingress.host=kastendemo.com
+--set service.pxBackupUIServiceType=LoadBalancer
 ```
 
-驗證服務相關  
-大致上可以分為  
-basicAuth  
-Open ID  
-openshift  
-ldap  
-
-POC階段建議使用basicAuth，可以自行創建帳號密碼(需要使用htpasswd創建)進行登入    
-產生htpasswd(需要預先安裝)  
+儲存空間    
+wcppolicy可以更換成自己的storageclass名稱
 ```
-sudo apt install -y apache2-utils
-cd 
-mkdir htpasswd 
-cd htpasswd/
-htpasswd -c $PWD/.htpasswd kasten  
-#輸入密碼之後
-cat .htpasswd  
+--set persistentStorage.enabled=true
+--set persistentStorage.storageClassName="wcppolicy"
+--set pxbackup.enabled=true
 ```
 
-
-```
---set auth.basicAuth.enabled=true 
---set auth.basicAuth.htpasswd='example:$apr1$qrAVXu.v$Q8YVc50vtiS8KPmiyrkld0'
-```
-
-
-```
---set auth.basicAuth.enabled=true 
---set auth.basicAuth.htpasswd='example:$apr1$qrAVXu.v$Q8YVc50vtiS8KPmiyrkld0'
-```
-
-以下參數主要為設定AirGapped的情境下，repo的位置，如果非安裝包的路徑，只需要修改[kastenrepo.veeam.com/kasten]，其他都是必須  
-```
---set global.airgapped.repository=kastenrepo.veeam.com/kasten 
---set global.upstreamCertifiedImages=true 
-```
-
-### 非必要但是建議放入的參數  
-Kasten備份出來的Config會放到由CSI產生的volume內(預設是20GB)，POC應該不影響，但是實務上要調整成大一點的空間  
-如果CSI本身有支援extend，那就可以在之後更改，如果沒有，就必須要在一開始就設定好大小  
-```
---set global.persistence.catalog.size=200Gi 
---set global.persistence.jobs.size=200Gi
---set global.persistence.logging.size=200Gi
-```  
-
-
-### 參考安裝指令參考  
-環境有L4且對外  
-
-```
-helm repo add kasten https://charts.kasten.io/
-helm repo update
-kubectl create namespace kasten-io
-```
-
-```
-helm install k10 kasten/k10 \
---namespace=kasten-io \
---set injectKanisterSidecar.enabled=true \
---set-string injectKanisterSidecar.namespaceSelector.matchLabels.k10/injectKanisterSidecar=true \
---set global.persistence.catalog.size=200Gi \
---set global.persistence.jobs.size=200Gi \
---set global.persistence.logging.size=200Gi \
---set externalGateway.create=true  \
---set global.persistence.storageClass=wcppolicy \
---set auth.basicAuth.enabled=true \
---set auth.basicAuth.htpasswd='kasten:$apr1$UtUFc7QC$15rWGptryX75BCJ32X8Hv0' \
---set features.vbrTkgsEnabled=true
-```
+### 額外指令  
 
 刪除指令參考以下  
 ```
@@ -248,19 +180,28 @@ helm uninstall k10 -n kasten-io
 ```
 
 
-
 ## 環境設定    
 
 ### Location Profile  
+
+通過以下指令找到服務UI  
+```
+kubectl get svc -n central
+```
+
+預設帳號密碼皆為`admin`  
+
 
 Location Profile目前總共支援6種模式  
 其中分為三大公有雲空間  
 以及地端三種空間NFS、S3、VBR  
 其中VBR只有支援Tanzu  
 
-新增Profile  
-![img](https://github.com/ReSin-Yan/Veeam-Kasten-WorkGuide/blob/main/img/01location.png "img")  
-![img](https://github.com/ReSin-Yan/Veeam-Kasten-WorkGuide/blob/main/img/02profile.png "img")  
+新增Cloud Accounts  
+其中地端S3請選擇AWS / S3 這一欄  
+img  
+img  
+
 
 
 新增S3空間  
@@ -276,69 +217,9 @@ Location Profile目前總共支援6種模式
 
 
 
-NFS為新版本加入的功能(原先沒有VBR跟NFS Path)  
+新增NFS空間  
 使用NFS當作儲存空間  
-需要將使用NFS的PVC建立在安裝Kasten的Namespace  
-EX:我的安裝指令使用helm install k10 kasten/k10 --namespace=kasten-io   
-代表我安裝在Kasten-io
-所以需要將PVC建立在kasten-io上  
 
-使用以下的方式分別產生PV.yaml以及PVC.yaml  
-其中在server的IP使用前面所產生的NFS路徑及IP  
-
-建立PV  
-```
-tee pv.yaml <<EOF
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: nfs
-spec:
-  capacity:
-    storage: 10Gi
-  accessModes:
-    - ReadWriteMany
-  nfs:
-    server: 172.18.19.238
-    path: "/home/ubuntu/nfsshare"
-  mountOptions:
-    - nfsvers=4.2
-EOF
-```
-
-
-建立PVC  
-```
-tee pvc.yaml <<EOF
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: nfs
-spec:
-  accessModes:
-    - ReadWriteMany
-  storageClassName: ""
-  resources:
-    requests:
-      storage: 10Gi
-  volumeName: nfs
-EOF
-```
-
-分別執行  
-```
-kubectl apply -f pv.yaml
-kubectl apply -f pvc.yaml -n kasten-io
-```
-
-
-之後再Kasten介面輸入  
-![img](https://github.com/ReSin-Yan/Veeam-Kasten-WorkGuide/blob/main/img/06nfs.png "img")  
-
-### Infrastructure Profiles  
-
-
-![img](https://github.com/ReSin-Yan/Veeam-Kasten-WorkGuide/blob/main/img/infra-vc.png "img")  
 
 
 ## 測試環境建立    
