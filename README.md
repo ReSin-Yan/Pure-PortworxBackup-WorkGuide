@@ -117,7 +117,12 @@ helm install nfs-subdir-external-provisioner nfs-subdir-external-provisioner/nfs
     --set nfs.server=[ip] \
     --set nfs.path=/home/ubuntu/nfsshare
 ```
-
+安裝stork(portworx連結所需要功能)  
+以下提供單獨stork功能安裝，不包含portworx entprise  
+```
+curl -fsL -o stork-spec.yaml "https://install.portworx.com/pxbackup?comp=stork&storkNonPx=true"
+kubectl apply -f stork-spec.yaml
+```
 
 ## 安裝說明  
 請參考以下安裝參數設定 
@@ -182,6 +187,8 @@ helm uninstall k10 -n kasten-io
 
 ## 環境設定    
 
+### Cluster Profile  
+
 ### Location Profile  
 
 通過以下指令找到服務UI  
@@ -225,11 +232,10 @@ img
 ## 測試環境建立    
 
 建立兩個命名空間  
-此兩個命名空間將會作來對比於是否具備Kanister的方式
+分別對應不同種類的CSI(測試環境為vmware-csi,NFS-subdir csi)  
 ```
 kubectl create ns nfs-csi
 kubectl create ns vsan-csi
-kubectl label namespace nfs-csi k10/injectKanisterSidecar=true
 ```
 
 根據兩個volume建立不同的部屬環境  
@@ -250,4 +256,17 @@ kubectl apply -f pre.yaml  -n vsan-csi
 kubectl apply -f post.yaml  -n vsan-csi
 kubectl get svc -n vsan-csi
 ```
+
+分別找到服務網址  
+```
+kubectl get svc -A
+```
+
+開啟服務之後  
+預設帳號密碼為`admin`   
+
+
+## 測試功能建立    
+
+
 
