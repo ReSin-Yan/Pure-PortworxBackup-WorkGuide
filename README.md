@@ -74,7 +74,7 @@ Portworx Backup同時支援兩種模式(S3,NFS)
 sudo apt-get install nfs-kernel-server nfs-common
 mkdir nfsshare
 sudo chmod -R 777 /home/ubuntu/nfsshare/
-```s
+```
 編輯/etc/exports  
 ```
 sudo vim /etc/exports  
